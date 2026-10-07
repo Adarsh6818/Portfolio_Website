@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio Website
 
-## Getting Started
+A dark-first, responsive developer portfolio built with **Next.js 16**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Features a working contact form, dark/light theme, and a downloadable résumé.
 
-First, run the development server:
+## Tech stack
+
+- Next.js 16 (App Router) + React 19 + TypeScript
+- Tailwind CSS v4 (class-based dark mode via `next-themes`)
+- Framer Motion (entrance animations + intro screen)
+- lucide-react + inline brand SVGs
+- react-hook-form + zod (contact form)
+- Resend (contact email delivery)
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Other scripts: `npm run build` (production build), `npm start` (serve build), `npm run lint`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Customize your content
 
-## Learn More
+All content lives in one file — **`src/lib/data.ts`**:
 
-To learn more about Next.js, take a look at the following resources:
+- `siteConfig` — name, role, tagline, bio, email, location, résumé path
+- `socials` — your social links
+- `skills` — tech grouped by category
+- `projects` — your projects (title, description, tech, live/source URLs)
+- `experience` — your roles/timeline
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Replace the placeholders, then:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Drop your résumé at `public/resume.pdf` (a placeholder is included).
+- Add a profile photo and swap the placeholder block in `src/components/sections/about.tsx` for an `<Image>`.
+- Add project thumbnails under `public/projects/` and set `image` on each project.
 
-## Deploy on Vercel
+## Contact form
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The form posts to `POST /api/contact`, which validates with zod and sends email via Resend.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Create a key at [resend.com/api-keys](https://resend.com/api-keys).
+2. Copy `.env.example` to `.env.local` and fill in:
+   - `RESEND_API_KEY`
+   - `CONTACT_TO_EMAIL` (where messages go)
+   - `CONTACT_FROM_EMAIL` (a verified-domain sender; the Resend sandbox `onboarding@resend.dev` works for testing)
+
+Without a key, the form runs in **dev mode**: it validates and logs the submission to the server console and returns success (no email sent). A hidden honeypot field blocks basic spam bots.
+
+## Deploy (Vercel)
+
+1. Push to GitHub.
+2. Import the repo at [vercel.com/new](https://vercel.com/new) (set the root to `portfolio_app`).
+3. Add the environment variables above.
+4. Deploy. (Optional: attach a custom domain and update `siteConfig.url`.)
