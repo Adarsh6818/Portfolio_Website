@@ -76,8 +76,8 @@ export function Hero() {
       </div>
 
       <a
-        href="#about"
-        aria-label="Scroll to about"
+        href="#skills"
+        aria-label="Scroll to skills"
         className="absolute bottom-8 left-1/2 -translate-x-1/2 text-faint transition-colors hover:text-foreground"
       >
         <ArrowDown className="size-5 animate-bounce" />

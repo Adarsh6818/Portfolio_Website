@@ -2,7 +2,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { experience } from "@/lib/data";
 
-export function Experience() {
+export function Experience({ index = "02" }: { index?: string }) {
   return (
     <section
       id="experience"
@@ -10,7 +10,7 @@ export function Experience() {
     >
       <div className="mx-auto w-full max-w-5xl px-6">
         <SectionHeading
-          index="04"
+          index={index}
           label="Experience"
           align="left"
           title={

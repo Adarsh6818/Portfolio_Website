@@ -2,7 +2,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { skills } from "@/lib/data";
 
-export function Skills() {
+export function Skills({ index = "02" }: { index?: string }) {
   return (
     <section
       id="skills"
@@ -10,7 +10,7 @@ export function Skills() {
     >
       <div className="mx-auto w-full max-w-5xl px-6">
         <SectionHeading
-          index="02"
+          index={index}
           label="My Stack"
           title={
             <>

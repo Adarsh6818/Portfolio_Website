@@ -9,11 +9,11 @@ const highlights = [
   { value: "∞", label: "Cups of coffee" },
 ];
 
-export function About() {
+export function About({ index = "01" }: { index?: string }) {
   return (
     <section id="about" className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 py-24 md:py-32">
       <SectionHeading
-        index="01"
+        index={index}
         label="About Me"
         align="left"
         title={

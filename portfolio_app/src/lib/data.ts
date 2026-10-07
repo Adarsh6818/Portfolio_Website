@@ -4,9 +4,9 @@
  */
 
 export const siteConfig = {
-  name: "Harshad",
+  name: "Adarsh",
   /** Shown in the browser tab / SEO */
-  fullName: "Harshad Lingayat",
+  fullName: "Adarsh Vishwakarma",
   role: "Software Developer",
   /** One-line value proposition for the hero */
   tagline:
@@ -15,7 +15,7 @@ export const siteConfig = {
     "Full-stack developer focused on clean, performant interfaces and reliable systems. I turn ideas into polished digital products.",
   location: "India",
   availability: "Available for projects",
-  email: "harshadalingayat21@gmail.com",
+  email: "adarshvish01@gmail.com",
   resumeUrl: "/resume.pdf",
   url: "https://example.com",
 };
@@ -24,23 +24,31 @@ export type SocialLink = {
   label: string;
   href: string;
   /** lucide-react icon name resolved in the component */
-  icon: "github" | "linkedin" | "twitter" | "mail" | "instagram";
+  icon: "github" | "linkedin" | "twitter" | "mail" | "instagram" | "facebook";
 };
 
 export const socials: SocialLink[] = [
-  { label: "GitHub", href: "https://github.com/", icon: "github" },
   { label: "LinkedIn", href: "https://linkedin.com/in/", icon: "linkedin" },
-  { label: "Twitter", href: "https://twitter.com/", icon: "twitter" },
-  { label: "Email", href: `mailto:${siteConfig.email}`, icon: "mail" },
+  { label: "GitHub", href: "https://github.com/", icon: "github" },
+  { label: "Instagram", href: "https://instagram.com/", icon: "instagram" },
+  { label: "Facebook", href: "https://facebook.com/", icon: "facebook" },
 ];
 
+/** Primary navigation (the logo itself links Home, so Home is omitted here). */
 export const navLinks = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Skills", href: "#skills" },
-  { label: "Projects", href: "#projects" },
-  { label: "Experience", href: "#experience" },
-  { label: "Contact", href: "#contact" },
+  { label: "About", href: "/about" },
+  { label: "Projects", href: "/projects" },
+  { label: "Contact", href: "/contact" },
+];
+
+/** Shown separately on the right of the navbar. */
+export const adventureLink = { label: "Let's Adventure", href: "/adventure" };
+
+/** Links used in the footer (includes Home). */
+export const footerLinks = [
+  { label: "Home", href: "/" },
+  ...navLinks,
+  adventureLink,
 ];
 
 export type SkillGroup = {

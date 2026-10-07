@@ -1,5 +1,6 @@
 import { Mail } from "lucide-react";
 import {
+  FacebookIcon,
   GithubIcon,
   InstagramIcon,
   LinkedinIcon,
@@ -12,6 +13,7 @@ const iconMap = {
   linkedin: LinkedinIcon,
   twitter: TwitterIcon,
   instagram: InstagramIcon,
+  facebook: FacebookIcon,
   mail: Mail,
 } as const;
 

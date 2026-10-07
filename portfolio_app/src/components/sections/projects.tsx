@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { GithubIcon } from "@/components/brand-icons";
 import { Reveal } from "@/components/ui/reveal";
@@ -79,14 +80,29 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
-export function Projects() {
+type ProjectsProps = {
+  /** section number shown in the heading */
+  index?: string;
+  /** limit the number of cards (e.g. a featured teaser on the home page) */
+  limit?: number;
+  /** show a "View all projects" link to the projects page */
+  showViewAll?: boolean;
+};
+
+export function Projects({
+  index = "03",
+  limit,
+  showViewAll = false,
+}: ProjectsProps) {
+  const shown = typeof limit === "number" ? projects.slice(0, limit) : projects;
+
   return (
     <section
       id="projects"
       className="mx-auto w-full max-w-5xl scroll-mt-24 px-6 py-24 md:py-32"
     >
       <SectionHeading
-        index="03"
+        index={index}
         label="Selected Work"
         title={
           <>
@@ -97,7 +113,7 @@ export function Projects() {
       />
 
       <div className="mt-14 grid gap-5 sm:grid-cols-2">
-        {projects.map((project, i) => (
+        {shown.map((project, i) => (
           <Reveal key={project.title} delay={(i % 2) * 0.08} className="h-full">
             <ProjectCard project={project} />
           </Reveal>
@@ -105,16 +121,26 @@ export function Projects() {
       </div>
 
       <Reveal className="mt-10 flex justify-center">
-        <a
-          href="https://github.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-3 text-sm font-medium transition-colors hover:border-accent/50"
-        >
-          <GithubIcon className="size-4" />
-          See more on GitHub
-          <ArrowUpRight className="size-4" />
-        </a>
+        {showViewAll ? (
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-3 text-sm font-medium transition-colors hover:border-accent/50"
+          >
+            View all projects
+            <ArrowUpRight className="size-4" />
+          </Link>
+        ) : (
+          <a
+            href="https://github.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-3 text-sm font-medium transition-colors hover:border-accent/50"
+          >
+            <GithubIcon className="size-4" />
+            See more on GitHub
+            <ArrowUpRight className="size-4" />
+          </a>
+        )}
       </Reveal>
     </section>
   );
