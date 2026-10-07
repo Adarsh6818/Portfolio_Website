@@ -1,26 +1,105 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode (toggled by next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- Light theme (counterpart) ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --border: rgba(0, 0, 0, 0.1);
+  --foreground: #0a0a0a;
+  --muted: #52525b;
+  --faint: #a1a1aa;
+  --accent: #059669;
+  --accent-foreground: #ffffff;
+}
+
+/* ---------- Dark theme (default / primary aesthetic) ---------- */
+.dark {
+  --background: #0a0a0a;
+  --surface: #111111;
+  --surface-2: #161618;
+  --border: rgba(255, 255, 255, 0.09);
+  --foreground: #ededed;
+  --muted: #8a8a92;
+  --faint: #52525b;
+  --accent: #34d399;
+  --accent-foreground: #04120c;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Monospace kicker label used across sections (e.g. 03 / MY STACK) */
+.mono-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Outlined / stroked display text for emphasis words */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--foreground);
+}
+
+/* Thin scrollbar that matches the theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--faint);
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
