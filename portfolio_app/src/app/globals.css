@@ -74,6 +74,11 @@ body {
   -webkit-text-stroke: 1.5px var(--foreground);
 }
 
+/* Flat-top hexagon used by the skill honeycomb */
+.hexagon {
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
 /* Thin scrollbar that matches the theme */
 ::-webkit-scrollbar {
   width: 10px;

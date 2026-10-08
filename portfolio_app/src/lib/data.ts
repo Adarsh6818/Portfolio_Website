@@ -71,6 +71,34 @@ export const skills: SkillGroup[] = [
   },
 ];
 
+/**
+ * Technologies shown in the honeycomb. `slug` is a simple-icons slug
+ * (resolved to a logo in the SkillHoneycomb component). Order matters:
+ * the first six fill the inner ring, the rest fill the outer ring.
+ */
+export type Tech = { name: string; slug: string };
+
+export const techStack: Tech[] = [
+  { name: "React", slug: "react" },
+  { name: "Next.js", slug: "nextdotjs" },
+  { name: "TypeScript", slug: "typescript" },
+  { name: "Node.js", slug: "nodedotjs" },
+  { name: "Tailwind CSS", slug: "tailwindcss" },
+  { name: "PostgreSQL", slug: "postgresql" },
+  { name: "JavaScript", slug: "javascript" },
+  { name: "HTML5", slug: "html5" },
+  { name: "CSS", slug: "css" },
+  { name: "Express", slug: "express" },
+  { name: "MongoDB", slug: "mongodb" },
+  { name: "Prisma", slug: "prisma" },
+  { name: "Git", slug: "git" },
+  { name: "GitHub", slug: "github" },
+  { name: "Docker", slug: "docker" },
+  { name: "Vercel", slug: "vercel" },
+  { name: "Figma", slug: "figma" },
+  { name: "Jest", slug: "jest" },
+];
+
 export type Project = {
   title: string;
   description: string;
