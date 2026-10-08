@@ -79,6 +79,40 @@ body {
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
 
+/* Honeycomb tile: thin border (hex-shape ring), fill, logo — with hover glow */
+.hex-item {
+  transition: transform 0.3s ease;
+}
+.hex-item .hex-shape {
+  background-color: var(--border);
+  transition: background-color 0.3s ease, filter 0.3s ease;
+}
+.hex-item .hex-inner {
+  background-color: var(--surface);
+  transition: background-color 0.3s ease;
+}
+.hex-item .hex-logo {
+  color: var(--muted);
+  transition: color 0.3s ease;
+}
+.hex-item.is-center .hex-shape {
+  background-color: var(--accent);
+}
+.hex-item:hover {
+  transform: scale(1.05);
+  z-index: 20;
+}
+.hex-item:hover .hex-shape {
+  background-color: var(--accent);
+  filter: drop-shadow(0 0 14px var(--accent));
+}
+.hex-item:hover .hex-inner {
+  background-color: var(--surface-2);
+}
+.hex-item:hover .hex-logo {
+  color: var(--accent);
+}
+
 /* Thin scrollbar that matches the theme */
 ::-webkit-scrollbar {
   width: 10px;

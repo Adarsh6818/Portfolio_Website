@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import {
   siCss,
   siDocker,
@@ -19,7 +21,6 @@ import {
   siTypescript,
   siVercel,
 } from "simple-icons";
-import { Reveal } from "@/components/ui/reveal";
 import { techStack } from "@/lib/data";
 
 /** slug → logo path (monochrome, tinted with currentColor) */
@@ -46,138 +47,144 @@ const ICONS: Record<string, { path: string }> = {
 
 const SQ3 = Math.sqrt(3);
 
-type Cell = { q: number; r: number };
+type Item = { kind: "logo"; name: string; path?: string } | { kind: "center" };
 
-/** Every axial cell within hex-distance 2 → a 1 + 6 + 12 = 19 cell flower. */
-function buildCells(): Cell[] {
-  const cells: Cell[] = [];
-  for (let q = -2; q <= 2; q++) {
-    for (let r = -2; r <= 2; r++) {
-      const s = -q - r;
-      if (Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) <= 2) {
-        cells.push({ q, r });
-      }
-    }
-  }
-  return cells;
-}
+const CENTER: Item = { kind: "center" };
 
-/** Flat-top axial → pixel offset, in units of the hex radius (--s). */
-function pos(q: number, r: number) {
-  return { x: 1.5 * q, y: SQ3 * (r + q / 2) };
-}
+const LOGOS: Item[] = techStack.map((t) => ({
+  kind: "logo",
+  name: t.name,
+  path: ICONS[t.slug]?.path,
+}));
 
-function HexCell({
+type Layout = { cols: number; rows: number; hexW: number; hexH: number; height: number };
+
+function Hex({
+  item,
   x,
   y,
-  name,
-  iconPath,
+  w,
+  h,
 }: {
+  item: Item;
   x: number;
   y: number;
-  name: string;
-  iconPath?: string;
+  w: number;
+  h: number;
 }) {
-  const f = 0.92; // shrink vs the cell to leave a honeycomb gap
+  const isCenter = item.kind === "center";
   return (
     <div
-      title={name}
-      className="group absolute -translate-x-1/2 -translate-y-1/2"
-      style={{
-        left: `calc(50% + var(--s) * ${x})`,
-        top: `calc(50% + var(--s) * ${y})`,
-        width: `calc(var(--s) * ${2 * f})`,
-        height: `calc(var(--s) * ${SQ3 * f})`,
-      }}
+      className={`hex-item absolute${isCenter ? " is-center" : ""}`}
+      style={{ left: x, top: y, width: w, height: h }}
+      title={isCenter ? "Right tools. Better solutions." : item.name}
     >
-      <div className="hexagon relative size-full bg-border transition-colors duration-300 group-hover:bg-accent/60">
-        <div className="hexagon absolute inset-[7%] flex items-center justify-center bg-surface transition-colors duration-300 group-hover:bg-surface-2">
-          {iconPath ? (
+      <div className="hex-shape hexagon relative size-full">
+        <div className="hex-inner hexagon absolute inset-[1.5px] flex items-center justify-center text-center">
+          {isCenter ? (
+            <div className="px-[12%]">
+              <p
+                className="font-semibold leading-tight tracking-tight"
+                style={{ fontSize: Math.max(10, w * 0.1) }}
+              >
+                Right tools.
+              </p>
+              <p
+                className="leading-tight text-muted"
+                style={{ fontSize: Math.max(8, w * 0.078) }}
+              >
+                Better solutions.
+              </p>
+            </div>
+          ) : item.path ? (
             <svg
               viewBox="0 0 24 24"
               aria-hidden
               fill="currentColor"
-              className="text-muted transition-colors duration-300 group-hover:text-accent"
-              style={{ width: "42%", height: "42%" }}
+              className="hex-logo"
+              style={{ width: "38%", height: "38%" }}
             >
-              <path d={iconPath} />
+              <path d={item.path} />
             </svg>
           ) : (
-            <span className="font-mono text-[10px] text-muted">{name}</span>
+            <span className="hex-logo font-mono text-xs">{item.name}</span>
           )}
         </div>
       </div>
-      <span className="sr-only">{name}</span>
-    </div>
-  );
-}
-
-function HexCenter() {
-  const f = 1.12; // slightly bigger than the surrounding hexes
-  return (
-    <div
-      className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
-      style={{
-        width: `calc(var(--s) * ${2 * f})`,
-        height: `calc(var(--s) * ${SQ3 * f})`,
-      }}
-    >
-      <div className="hexagon relative size-full bg-accent/70">
-        <div className="hexagon absolute inset-[6%] flex flex-col items-center justify-center gap-0.5 bg-surface px-3 text-center">
-          <p
-            className="font-semibold leading-tight tracking-tight"
-            style={{ fontSize: "clamp(10px, 1.5vw, 15px)" }}
-          >
-            Right tools.
-          </p>
-          <p
-            className="leading-tight text-muted"
-            style={{ fontSize: "clamp(9px, 1.2vw, 12px)" }}
-          >
-            Better solutions.
-          </p>
-        </div>
-      </div>
+      {!isCenter ? <span className="sr-only">{item.name}</span> : null}
     </div>
   );
 }
 
 export function SkillHoneycomb() {
-  const outer = buildCells()
-    .filter((c) => !(c.q === 0 && c.r === 0))
-    .map((c) => {
-      const p = pos(c.q, c.r);
-      const dist = (Math.abs(c.q) + Math.abs(c.r) + Math.abs(c.q + c.r)) / 2;
-      // start the outer ring from the top and go clockwise
-      const angle = (Math.atan2(p.y, p.x) + Math.PI * 2.5) % (Math.PI * 2);
-      return { ...p, dist, angle };
-    })
-    .sort((a, b) => a.dist - b.dist || a.angle - b.angle);
+  const ref = useRef<HTMLDivElement>(null);
+  const [layout, setLayout] = useState<Layout | null>(null);
 
-  const containerStyle = {
-    "--s": "clamp(1.9rem, 6.5vw, 3.6rem)",
-    width: "calc(var(--s) * 8)",
-    height: "calc(var(--s) * 8.66)",
-  } as CSSProperties;
+  const total = LOGOS.length + 1; // logos + center
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const compute = () => {
+      const width = el.clientWidth;
+      if (!width) return;
+      // Target hex width by breakpoint; derive column count, then fit exactly.
+      const target = width < 500 ? 96 : width < 900 ? 130 : 168;
+      let cols = Math.round(width / (target * 0.75));
+      cols = Math.max(3, Math.min(cols, total));
+      const hexW = width / (0.75 * (cols - 1) + 1);
+      const hexH = hexW * (SQ3 / 2);
+      const rows = Math.ceil(total / cols);
+      const height = rows * hexH + hexH / 2;
+      setLayout({ cols, rows, hexW, hexH, height });
+    };
+
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [total]);
+
+  // Assign items to grid slots: the center tile sits in the middle of the top row.
+  let placed: { item: Item; row: number; col: number }[] = [];
+  if (layout) {
+    const centerSlot = Math.floor((layout.cols - 1) / 2); // row 0, middle column
+    const items: Item[] = [];
+    let li = 0;
+    for (let s = 0; s < total; s++) {
+      if (s === centerSlot) items.push(CENTER);
+      else items.push(LOGOS[li++]);
+    }
+    placed = items.map((item, i) => ({
+      item,
+      row: Math.floor(i / layout.cols),
+      col: i % layout.cols,
+    }));
+  }
 
   return (
-    <Reveal className="mt-16 flex justify-center">
-      <div className="relative" style={containerStyle}>
-        <HexCenter />
-        {outer.map((cell, i) => {
-          const tech = techStack[i];
-          if (!tech) return null;
-          return (
-            <HexCell
-              key={tech.slug}
-              x={cell.x}
-              y={cell.y}
-              name={tech.name}
-              iconPath={ICONS[tech.slug]?.path}
-            />
-          );
-        })}
-      </div>
-    </Reveal>
+    <div
+      ref={ref}
+      className="relative w-full"
+      style={{ height: layout?.height ?? 260 }}
+    >
+      {layout
+        ? placed.map(({ item, row, col }, i) => {
+            const x = col * 0.75 * layout.hexW;
+            const y = row * layout.hexH + (col % 2) * (layout.hexH / 2);
+            return (
+              <Hex
+                key={i}
+                item={item}
+                x={x}
+                y={y}
+                w={layout.hexW}
+                h={layout.hexH}
+              />
+            );
+          })
+        : null}
+    </div>
   );
 }
