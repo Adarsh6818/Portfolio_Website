@@ -20,6 +20,14 @@ export const siteConfig = {
   url: "https://example.com",
 };
 
+/** Copy for the contact page hero. */
+export const contactHero = {
+  badge: "Contact",
+  title: "Get in touch",
+  subtitle:
+    "Have a project in mind, a role to fill, or just want to say hello? Drop me a message — my inbox is always open.",
+};
+
 export type SocialLink = {
   label: string;
   href: string;

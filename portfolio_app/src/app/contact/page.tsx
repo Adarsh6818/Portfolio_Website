@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { ContactDirect } from "@/components/sections/contact-direct";
-import { ContactForm } from "@/components/sections/contact-form";
+import { ContactHero } from "@/components/sections/contact-hero";
 import { ContactSocial } from "@/components/sections/contact-social";
 import { CtaBand } from "@/components/sections/cta-band";
 
@@ -12,11 +11,10 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="pt-20 md:pt-28">
-      <ContactDirect index="01" />
-      <ContactForm index="02" />
-      <ContactSocial index="03" />
+    <>
+      <ContactHero />
+      <ContactSocial index="01" />
       <CtaBand />
-    </div>
+    </>
   );
 }
