@@ -79,6 +79,20 @@ body {
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
 
+/* Pointy-top hexagon — outline of a merged 7-hex flower (the big center tile) */
+.hexagon-pointy {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* Faint filler hex used to complete the honeycomb edges */
+.hex-filler .hex-shape {
+  background-color: var(--border);
+  opacity: 0.45;
+}
+.hex-filler .hex-inner {
+  background-color: var(--surface);
+}
+
 /* Honeycomb tile: thin border (hex-shape ring), fill, logo — with hover glow */
 .hex-item {
   transition: transform 0.3s ease;
