@@ -49,63 +49,32 @@ const SQ3 = Math.sqrt(3);
 
 const LOGOS = techStack.map((t) => ({ name: t.name, path: ICONS[t.slug]?.path }));
 
-type Layout = {
-  cols: number;
-  rows: number;
-  hexW: number;
-  hexH: number;
-  height: number;
-  cc: number; // center column
-  cr: number; // center row
-};
+type Cell = { c: number; r: number; x: number; y: number; cx: number; cy: number; d: number };
+type Layout = { hexW: number; hexH: number; width: number; height: number; cells: Cell[] };
 
-/** The 6 neighbours of a cell in an odd-column-shifted flat-top grid. */
-function neighbours(c: number, r: number): [number, number][] {
-  if (c % 2 === 0) {
-    return [
-      [c, r - 1],
-      [c, r + 1],
-      [c - 1, r - 1],
-      [c - 1, r],
-      [c + 1, r - 1],
-      [c + 1, r],
-    ];
-  }
-  return [
-    [c, r - 1],
-    [c, r + 1],
-    [c - 1, r],
-    [c - 1, r + 1],
-    [c + 1, r],
-    [c + 1, r + 1],
-  ];
-}
-
-function colsForWidth(width: number) {
-  if (width < 600) return 5; // → 5 rows, 25 slots, 0 filler
-  if (width < 900) return 7; // → 4 rows
-  return 9; // → 3 rows
+function colsForWidth(w: number) {
+  if (w >= 1000) return 8;
+  if (w >= 640) return 6;
+  return 5;
 }
 
 function LogoHex({
   name,
   path,
-  x,
-  y,
+  cell,
   w,
   h,
 }: {
   name: string;
   path?: string;
-  x: number;
-  y: number;
+  cell: Cell;
   w: number;
   h: number;
 }) {
   return (
     <div
       className="hex-item absolute"
-      style={{ left: x, top: y, width: w, height: h }}
+      style={{ left: cell.x, top: cell.y, width: w, height: h }}
       title={name}
     >
       <div className="hex-shape hexagon relative size-full">
@@ -130,21 +99,11 @@ function LogoHex({
   );
 }
 
-function FillerHex({
-  x,
-  y,
-  w,
-  h,
-}: {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}) {
+function FillerHex({ cell, w, h }: { cell: Cell; w: number; h: number }) {
   return (
     <div
       className="hex-filler pointer-events-none absolute"
-      style={{ left: x, top: y, width: w, height: h }}
+      style={{ left: cell.x, top: cell.y, width: w, height: h }}
       aria-hidden
     >
       <div className="hex-shape hexagon relative size-full">
@@ -158,8 +117,6 @@ export function SkillHoneycomb() {
   const ref = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState<Layout | null>(null);
 
-  const CARVE = 7; // center cell + 6 neighbours merged into the big tile
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -168,13 +125,35 @@ export function SkillHoneycomb() {
       const width = el.clientWidth;
       if (!width) return;
       const cols = colsForWidth(width);
-      const rows = Math.ceil((LOGOS.length + CARVE) / cols);
+      // enough rows to hold all logos plus the empty central zone
+      const rows = Math.max(3, Math.ceil((LOGOS.length + 5) / cols));
       const hexW = width / (0.75 * (cols - 1) + 1);
       const hexH = hexW * (SQ3 / 2);
       const height = rows * hexH + hexH / 2;
-      const cc = Math.floor(cols / 2);
-      const cr = Math.floor(rows / 2);
-      setLayout({ cols, rows, hexW, hexH, height, cc, cr });
+      const midX = width / 2;
+      const midY = height / 2;
+
+      // Central empty zone (holds the "Right tools" text — no hexes here).
+      const rx = width * 0.22;
+      const ry = height * 0.3;
+
+      const cells: Cell[] = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = c * 0.75 * hexW;
+          const y = r * hexH + (c % 2) * (hexH / 2);
+          const cx = x + hexW / 2;
+          const cy = y + hexH / 2;
+          const inZone =
+            ((cx - midX) / rx) ** 2 + ((cy - midY) / ry) ** 2 < 1;
+          if (inZone) continue; // leave empty for the text
+          cells.push({ c, r, x, y, cx, cy, d: Math.hypot(cx - midX, cy - midY) });
+        }
+      }
+      // Farthest cells get logos; the few nearest the centre become faint
+      // filler so the honeycomb thins out around the empty middle.
+      cells.sort((a, b) => b.d - a.d);
+      setLayout({ hexW, hexH, width, height, cells });
     };
 
     compute();
@@ -183,77 +162,22 @@ export function SkillHoneycomb() {
     return () => ro.disconnect();
   }, []);
 
-  const cellX = (c: number, w: number) => c * 0.75 * w;
-  const cellY = (c: number, r: number, h: number) => r * h + (c % 2) * (h / 2);
-
-  const tiles: ReactNode[] = [];
-  let bigTile: ReactNode = null;
-
+  let tiles: ReactNode = null;
   if (layout) {
-    const { cols, rows, hexW, hexH, cc, cr } = layout;
-
-    // Cells merged into the big central tile.
-    const carved = new Set<string>([`${cc},${cr}`]);
-    for (const [nc, nr] of neighbours(cc, cr)) carved.add(`${nc},${nr}`);
-
-    let logoIdx = 0;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (carved.has(`${c},${r}`)) continue;
-        const x = cellX(c, hexW);
-        const y = cellY(c, r, hexH);
-        if (logoIdx < LOGOS.length) {
-          const logo = LOGOS[logoIdx++];
-          tiles.push(
-            <LogoHex
-              key={`${c},${r}`}
-              name={logo.name}
-              path={logo.path}
-              x={x}
-              y={y}
-              w={hexW}
-              h={hexH}
-            />,
-          );
-        } else {
-          tiles.push(<FillerHex key={`${c},${r}`} x={x} y={y} w={hexW} h={hexH} />);
-        }
-      }
-    }
-
-    // Big central tile — a pointy-top hexagon covering the 7-cell flower.
-    const centerX = cellX(cc, hexW) + hexW / 2;
-    const centerY = cellY(cc, cr, hexH) + hexH / 2;
-    const bigW = hexW * 2.4;
-    const bigH = bigW * (2 / SQ3); // pointy-top aspect
-    const line1 = Math.min(34, Math.max(14, bigW * 0.115));
-    const line2 = Math.min(18, Math.max(10, bigW * 0.085));
-
-    bigTile = (
-      <div
-        className="absolute z-10"
-        style={{
-          left: centerX - bigW / 2,
-          top: centerY - bigH / 2,
-          width: bigW,
-          height: bigH,
-        }}
-        title="Right tools. Better solutions."
-      >
-        <div className="hexagon-pointy relative size-full bg-accent [filter:drop-shadow(0_0_18px_var(--accent))]">
-          <div className="hexagon-pointy absolute inset-[2px] flex flex-col items-center justify-center gap-1 bg-surface px-[14%] text-center">
-            <p
-              className="font-semibold leading-none tracking-tight"
-              style={{ fontSize: line1 }}
-            >
-              Right tools.
-            </p>
-            <p className="leading-tight text-muted" style={{ fontSize: line2 }}>
-              Better solutions.
-            </p>
-          </div>
-        </div>
-      </div>
+    const { hexW, hexH, cells } = layout;
+    tiles = cells.map((cell, i) =>
+      i < LOGOS.length ? (
+        <LogoHex
+          key={`${cell.c}-${cell.r}`}
+          name={LOGOS[i].name}
+          path={LOGOS[i].path}
+          cell={cell}
+          w={hexW}
+          h={hexH}
+        />
+      ) : (
+        <FillerHex key={`${cell.c}-${cell.r}`} cell={cell} w={hexW} h={hexH} />
+      ),
     );
   }
 
@@ -264,7 +188,18 @@ export function SkillHoneycomb() {
       style={{ height: layout?.height ?? 320 }}
     >
       {tiles}
-      {bigTile}
+
+      {/* Central empty space — text only, no hexagon */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+        <div className="max-w-[46%] text-center">
+          <p className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">
+            Right tools.
+          </p>
+          <p className="mt-1 text-sm text-muted sm:text-base">
+            Better solutions.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
